@@ -135,8 +135,25 @@ cc.Class({
 
     },
 
-    swap(first, second){
-        
+    swap(row1, column1, row2, column2){
+        //move position
+        let box1 = this.listBoxes[row1][column1].getComponent('Box')
+        let box2 = this.listBoxes[row2][column2].getComponent('Box')
+
+        //2 position is used to swap
+        let position1 = box1.node.position
+        let position2 = box2.node.position
+
+        //move squares
+        box1.square.getComponent('Square').moveToPosition(position2)
+        box2.square.getComponent('Square').moveToPosition(position1)
+
+        //change index
+        let tempSquare = box1.square
+        box1.square = box2.square
+        box2.square = tempSquare
+
+        console.log("moved!")
     },
 
     getIndexLeftOf(i){

@@ -47,7 +47,7 @@ cc.Class({
 
                 if(Math.abs(offset.x) > Math.abs(offset.y)) 
                 {   
-                    if(Math.abs(offset.x) >= game.sizeSquare.width / 2)
+                    if(Math.abs(offset.x) >= game.sizeSquare.width / 3)
                     {
                         let go = null;
                         if(offset.x < 0)
@@ -69,7 +69,7 @@ cc.Class({
                 }
                 else
                 {
-                    if(Math.abs(offset.y) >= game.sizeSquare.height / 2)
+                    if(Math.abs(offset.y) >= game.sizeSquare.height / 3)
                     {
                         let go = null;
                         if(offset.y < 0)
@@ -102,31 +102,13 @@ cc.Class({
                     squareCom.moveToPosition(this.node.position)
                 }
             }
-            this.isMoved = false;
+            this.isMoved = false
         }, this)
     },
 
     goTo(row, column){
-        let game = window.game
-
-        //move position
-        let boxSwap = game.listBoxes[row][column].getComponent('Box')
-
-        //2 position is used to swap
-        let currentPosition = this.node.position
-        let nextPosition = boxSwap.node.position
-
-        //move squares
-        boxSwap.square.getComponent('Square').moveToPosition(currentPosition)
-        this.square.getComponent('Square').moveToPosition(nextPosition)
-
-        //change index
-        let tempSquare = boxSwap.square
-        boxSwap.square = this.square
-        this.square = tempSquare
-
-        console.log("moved!")
-        this.isMoved = true;
+        window.game.swap(this.row, this.column, row, column)
+        this.isMoved = true
     }
 
 });
