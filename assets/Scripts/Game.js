@@ -64,7 +64,6 @@ cc.Class({
     },
 
     update (dt) {
-        
         this.updatePositionSquare()
     },
 
@@ -289,7 +288,6 @@ cc.Class({
         let position1 = box1.node.position
         let position2 = box2.node.position
 
-        //move squares
         if(box1.square != null)
         {
             let square1 = box1.square.getComponent('Square')

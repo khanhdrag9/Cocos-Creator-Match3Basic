@@ -109,16 +109,24 @@ cc.Class({
 
     goTo(row, column){
         window.game.swap(this.row, this.column, row, column)
+        let isMatch = window.game.checkMatchAll()
+        if(!isMatch)
+        {
+            console.log('not match -> revert')
+            window.game.swap(this.row, this.column, row, column)
+        }
         this.isMoved = true
     },
 
     destroySquare(){
-        let action = cc.fadeTo(4, 50)
-        let sequence = cc.sequence(action, cc.callFunc(function(){
-            if(this.square)
-                this.square.destroy()
+        let action = cc.fadeTo(0.5, 50)
+        let sequence = cc.sequence(
+            action,
+            cc.removeSelf(true),
+            cc.callFunc(function(){
             this.square = null
         }, this))
+        sequence.setTag(-1)
         this.square.runAction(sequence)
     }
 

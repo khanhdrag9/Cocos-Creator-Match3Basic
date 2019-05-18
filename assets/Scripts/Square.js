@@ -13,7 +13,7 @@ cc.Class({
     extends: cc.Component,
 
     properties: {
-        speedMove : 0.25
+        speedMove : 0.2
     },
 
     onLoad(){
@@ -21,7 +21,11 @@ cc.Class({
 
     moveToPosition(pos){
         let action = cc.moveTo(this.speedMove, pos)
-        this.node.runAction(action)
+        if(this.node.getActionByTag(-1) == null)
+        {
+            this.node.stopAllActions()
+            this.node.runAction(action)
+        }
     },
 
     // update (dt) {},
