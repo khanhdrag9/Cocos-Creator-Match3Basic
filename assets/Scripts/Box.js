@@ -39,7 +39,7 @@ cc.Class({
         }, this)
 
         this.node.on('touchmove', function(event){
-            if(!this.isMoved)
+            if(!this.isMoved && this.square != null)
             {
                 let touchLocation = event.touch.getLocation()
                 let offset = cc.v2(touchLocation.x - this.touchBegin.x, touchLocation.y - this.touchBegin.y)
@@ -95,7 +95,7 @@ cc.Class({
         }, this)
 
         this.node.on('touchend', function(event){
-            if(this.isMoved == false)
+            if(this.isMoved == false && this.square != null)
             {
                 let squareCom = this.square.getComponent('Square')
                 if(squareCom != null || squareCom != undefined)
@@ -114,7 +114,12 @@ cc.Class({
 
     destroySquare(){
         let action = cc.fadeTo(4, 50)
-        this.square.runAction(action)
+        let sequence = cc.sequence(action, cc.callFunc(function(){
+            if(this.square)
+                this.square.destroy()
+            this.square = null
+        }, this))
+        this.square.runAction(sequence)
     }
 
 });

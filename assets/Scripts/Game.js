@@ -60,6 +60,7 @@ cc.Class({
         window.game=this;
 
         this.checkMatchAll()
+        this.updatePositionSquare()
     },
 
     update (dt) {
@@ -226,21 +227,57 @@ cc.Class({
             })
         })
 
+        if(deleteBoxes.length > 0)return true
+        else return false
     },
 
     updatePositionSquare()
     {
-        for(let row = 0; row < this.height; row++)
+        // for(let row = 0; row < this.height; row++)
+        // {
+        //     for(let column = 0; column < this.width; column++)
+        //     {
+        //         let box = this.listBoxes[row][column].getComponent('Box')
+        //         if(box.square == null && box.row < this.height - 1)
+        //         {
+        //             this.swap(box.row, box.column, box.row + 1, box.column)
+        //         }
+        //     }
+        // }
+
+        function Pair(box, count) {
+            this.box = box
+            this.count = count
+        }
+        let array = new Array;
+
+        for(let column = 0; column < this.width; column++)
         {
-            for(let column = 0; column < this.width; column++)
+            let count = 0
+            for(let row = 0; row < this.height; row++)
             {
                 let box = this.listBoxes[row][column].getComponent('Box')
-                if(box.square == null)
+                if(box.square == null && row < this.height - 1)
                 {
-                    this.swap(box.row, box.column, box.row + 1, box.column)
+                    ++count
+                }
+                else if(count != 0)
+                {
+                    let p = new Pair(box, count)
+                    array.push(p)
                 }
             }
         }
+
+        array.forEach(function(p){
+            if(p != undefined && p.box != undefined && p.box != null)
+            {
+                let box = p.box
+                if(box.row - p.count >= 0)
+                    this.swap(box.row, box.column, box.row - p.count, box.column)
+            }
+        }, this)
+
     },
 
     swap(row1, column1, row2, column2){
@@ -253,18 +290,24 @@ cc.Class({
         let position2 = box2.node.position
 
         //move squares
-        let square1 = box1.square.getComponent('Square')
-        if(square1 != null)square1.moveToPosition(position2)
+        if(box1.square != null)
+        {
+            let square1 = box1.square.getComponent('Square')
+            if(square1 != null)square1.moveToPosition(position2)
+        }
 
-        let square2 = box2.square.getComponent('Square')
-        if(square2 != null)square2.moveToPosition(position1)
+        if(box2.square != null)
+        {
+            let square2 = box2.square.getComponent('Square')
+            if(square2 != null)square2.moveToPosition(position1)
+        }
 
         //change index
         let tempSquare = box1.square
         box1.square = box2.square
         box2.square = tempSquare
 
-        console.log("moved!")
+        // let isMatch = this.checkMatchAll()
     },
 
     getIndexLeftOf(i){
