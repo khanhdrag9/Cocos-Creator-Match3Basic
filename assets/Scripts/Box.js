@@ -7,7 +7,7 @@
 // Learn life-cycle callbacks:
 //  - [Chinese] https://docs.cocos.com/creator/manual/zh/scripting/life-cycle-callbacks.html
 //  - [English] https://www.cocos2d-x.org/docs/creator/manual/en/scripting/life-cycle-callbacks.html
-
+'use strict';
 
 cc.Class({
     extends: cc.Component,
@@ -35,6 +35,7 @@ cc.Class({
         this.node.on('touchstart', function(event){
             this.touchBegin = event.touch.getLocation()
             this.isMoved = false;
+
         }, this)
 
         this.node.on('touchmove', function(event){
@@ -109,6 +110,11 @@ cc.Class({
     goTo(row, column){
         window.game.swap(this.row, this.column, row, column)
         this.isMoved = true
+    },
+
+    destroySquare(){
+        let action = cc.fadeTo(4, 50)
+        this.square.runAction(action)
     }
 
 });

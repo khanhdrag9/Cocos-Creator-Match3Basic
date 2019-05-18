@@ -7,7 +7,7 @@
 // Learn life-cycle callbacks:
 //  - [Chinese] https://docs.cocos.com/creator/manual/zh/scripting/life-cycle-callbacks.html
 //  - [English] https://www.cocos2d-x.org/docs/creator/manual/en/scripting/life-cycle-callbacks.html
-
+'use strict';
 import Square from './Square.js'
 import Box from './Box.js'
 
@@ -58,6 +58,13 @@ cc.Class({
         this.getGrid()        
         this.generateSquares()
         window.game=this;
+
+        this.checkMatchAll()
+    },
+
+    update (dt) {
+        
+        this.updatePositionSquare()
     },
 
     getGrid(){
@@ -108,6 +115,7 @@ cc.Class({
             boxCom.column = column
             boxCom.square = cc.instantiate(this.square)
             boxCom.square.color = color
+            // boxCom.square.color = cc.Color.WHITE
             let squareCom = boxCom.square.getComponent('Square')
             if(squareCom)
             {
@@ -131,8 +139,108 @@ cc.Class({
             return array[Math.floor(Math.random() * array.length)];
     },
 
-    checkMatch3(square){
+    checkMatchAll(){
+        let deleteBoxes = new Array;
 
+        let lamdaCheckBox = (box1, box2, tempBoxes)=>{
+            let length = tempBoxes.length
+            if(box1.square != null && box2.square != null)
+            {
+                if(box1.square.color.equals(box2.square.color))
+                {
+                    if(length == 0)tempBoxes.push(box1)
+                    tempBoxes.push(box2)
+                }
+                else if(length < 3)
+                {
+                    if(tempBoxes.length > 0)tempBoxes.splice(0, tempBoxes.length)
+                }
+                else if(length >= 3)
+                {
+                    // tempBoxes.forEach(function(box){deleteBoxes.push(box)})
+                    deleteBoxes.push(tempBoxes)
+                    tempBoxes =  new Array
+                }
+            }
+            else if(length < 3)
+            {
+                if(tempBoxes.length > 0)tempBoxes.splice(0, tempBoxes.length)
+            }
+            else if(length >= 3)
+            {
+                // tempBoxes.forEach(function(box){deleteBoxes.push(box)})
+                deleteBoxes.push(tempBoxes)
+                tempBoxes = new Array
+            }
+
+            return tempBoxes
+        }
+
+        //find by row
+        for(let row = 0; row < this.height; row++)
+        {
+            let tempBoxes = new Array;
+            let column = 1;
+            for(column ;column < this.width; column++)
+            {
+                let box1 = this.listBoxes[row][column - 1].getComponent('Box')
+                let box2= this.listBoxes[row][column].getComponent('Box')
+                tempBoxes = lamdaCheckBox(box1, box2, tempBoxes)
+            }
+
+            if(tempBoxes.length >=3 && column == this.width)
+            {
+                // tempBoxes.forEach(function(box){deleteBoxes.push(box)})
+                deleteBoxes.push(tempBoxes)
+            }
+            tempBoxes = new Array
+        }
+
+        //find by column
+        for(let column = 0; column < this.width; column++)
+        {
+            let tempBoxes = new Array;
+            let row = 1
+            for(row; row < this.height; row++)
+            {
+                let box1 = this.listBoxes[row-1][column].getComponent('Box')
+                let box2= this.listBoxes[row][column].getComponent('Box')
+                tempBoxes = lamdaCheckBox(box1, box2, tempBoxes)
+            }
+
+            if(tempBoxes.length >=3 && row == this.height)
+            {
+                // tempBoxes.forEach(function(box){deleteBoxes.push(box)})
+                deleteBoxes.push(tempBoxes)
+            }
+            tempBoxes = new Array
+        }
+
+        console.log(deleteBoxes)
+        deleteBoxes.forEach(function(boxes){
+            boxes.forEach(function(box){
+                if(box instanceof Box){      
+                    console.log("destroy")          
+                    box.destroySquare()
+                }
+            })
+        })
+
+    },
+
+    updatePositionSquare()
+    {
+        for(let row = 0; row < this.height; row++)
+        {
+            for(let column = 0; column < this.width; column++)
+            {
+                let box = this.listBoxes[row][column].getComponent('Box')
+                if(box.square == null)
+                {
+                    this.swap(box.row, box.column, box.row + 1, box.column)
+                }
+            }
+        }
     },
 
     swap(row1, column1, row2, column2){
@@ -145,8 +253,11 @@ cc.Class({
         let position2 = box2.node.position
 
         //move squares
-        box1.square.getComponent('Square').moveToPosition(position2)
-        box2.square.getComponent('Square').moveToPosition(position1)
+        let square1 = box1.square.getComponent('Square')
+        if(square1 != null)square1.moveToPosition(position2)
+
+        let square2 = box2.square.getComponent('Square')
+        if(square2 != null)square2.moveToPosition(position1)
 
         //change index
         let tempSquare = box1.square
@@ -183,7 +294,6 @@ cc.Class({
             let r = i.row == 0 ? -1 : i.row - 1
             return new GridPos(r, i.column)
         }
-    }
+    },
 
-    // update (dt) {},
 });
