@@ -64,6 +64,7 @@ cc.Class({
     },
 
     update (dt) {
+        this.checkMatchAll()
         this.updatePositionSquare()
     },
 
@@ -100,37 +101,38 @@ cc.Class({
             {
                 let position = inRow[column]
                 let color = this.getColorInArray(this.squareTypes)
-                let box = this.createSquareAt(row, column, position, color)
+                let box = this.createBoxAt(row, column, position, color)
                 this.listBoxes[row].push(box)
             }
         }
     },
 
-    createSquareAt (row, column, position, color) {
+    createBoxAt (row, column, position, color) {
         let box = cc.instantiate(this.box)
         let boxCom = box.getComponent('Box')
         if(boxCom)
         {
             boxCom.row = row
             boxCom.column = column
-            boxCom.square = cc.instantiate(this.square)
-            boxCom.square.color = color
-            // boxCom.square.color = cc.Color.WHITE
-            let squareCom = boxCom.square.getComponent('Square')
-            if(squareCom)
-            {
-                squareCom.row = row
-                squareCom.column = column
-                squareCom.origin_position = position
-            }
+            // boxCom.square = cc.instantiate(this.square)
+            // boxCom.square.color = color
+            // boxCom.square.setPosition(position)
+            // this.node.addChild(boxCom.square, 20)
+            this.createSquareAt(boxCom, position, color)
 
-            boxCom.square.setPosition(position)
-            this.node.addChild(boxCom.square, 20)
         }
         box.setPosition(position)
         this.node.addChild(box, 10)
 
         return box
+    },
+
+    //@boxCom is 'Box' object, toPosition is option - can be drop to gameboard
+    createSquareAt(boxCom, position, color){
+        boxCom.square = cc.instantiate(this.square)
+        boxCom.square.color = color
+        boxCom.square.setPosition(position)
+        this.node.addChild(boxCom.square, 20)
     },
 
     getColorInArray (array) {
@@ -216,11 +218,9 @@ cc.Class({
             tempBoxes = new Array
         }
 
-        console.log(deleteBoxes)
         deleteBoxes.forEach(function(boxes){
             boxes.forEach(function(box){
-                if(box instanceof Box){      
-                    console.log("destroy")          
+                if(box instanceof Box){        
                     box.destroySquare()
                 }
             })
@@ -232,18 +232,6 @@ cc.Class({
 
     updatePositionSquare()
     {
-        // for(let row = 0; row < this.height; row++)
-        // {
-        //     for(let column = 0; column < this.width; column++)
-        //     {
-        //         let box = this.listBoxes[row][column].getComponent('Box')
-        //         if(box.square == null && box.row < this.height - 1)
-        //         {
-        //             this.swap(box.row, box.column, box.row + 1, box.column)
-        //         }
-        //     }
-        // }
-
         function Pair(box, count) {
             this.box = box
             this.count = count
@@ -269,7 +257,7 @@ cc.Class({
         }
 
         array.forEach(function(p){
-            if(p != undefined && p.box != undefined && p.box != null)
+            if(p.box != null)
             {
                 let box = p.box
                 if(box.row - p.count >= 0)
@@ -305,7 +293,6 @@ cc.Class({
         box1.square = box2.square
         box2.square = tempSquare
 
-        // let isMatch = this.checkMatchAll()
     },
 
     getIndexLeftOf(i){

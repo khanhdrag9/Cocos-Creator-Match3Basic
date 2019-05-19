@@ -39,7 +39,7 @@ cc.Class({
         }, this)
 
         this.node.on('touchmove', function(event){
-            if(!this.isMoved && this.square != null)
+            if(!this.isMoved && this.square != null && !this.square.getComponent('Square').moving)
             {
                 let touchLocation = event.touch.getLocation()
                 let offset = cc.v2(touchLocation.x - this.touchBegin.x, touchLocation.y - this.touchBegin.y)
@@ -119,6 +119,8 @@ cc.Class({
     },
 
     destroySquare(){
+        if(this.square.getComponent('Square').died)return;
+
         let action = cc.fadeTo(0.5, 50)
         let sequence = cc.sequence(
             action,
@@ -127,7 +129,9 @@ cc.Class({
             this.square = null
         }, this))
         sequence.setTag(-1)
+        this.square.getComponent('Square').died = true
         this.square.runAction(sequence)
+        console.log("destroy")        
     }
 
 });

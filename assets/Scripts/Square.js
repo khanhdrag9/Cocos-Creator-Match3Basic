@@ -13,19 +13,32 @@ cc.Class({
     extends: cc.Component,
 
     properties: {
-        speedMove : 0.2
+        speedMove : 0.2,
+        moving: false,
+        died: true
     },
 
     onLoad(){
+        this.died = false
     },
 
     moveToPosition(pos){
-        let action = cc.moveTo(this.speedMove, pos)
-        if(this.node.getActionByTag(-1) == null)
-        {
-            this.node.stopAllActions()
+        if(this.died)return false
+        // let action = cc.moveTo(this.speedMove, pos)
+        // if(this.node.getActionByTag(-1) == null)
+        // {
+            this.node.stopActionByTag(1)
+            let action = cc.sequence(
+                cc.moveTo(this.speedMove, pos),
+                cc.callFunc(function(){
+                    this.moving = false
+                }, this))
+            action.setTag(1)
+            this.moving = true
             this.node.runAction(action)
-        }
+        // }
+
+        return true
     },
 
     // update (dt) {},
