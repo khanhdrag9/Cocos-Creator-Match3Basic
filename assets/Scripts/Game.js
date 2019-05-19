@@ -319,15 +319,14 @@ cc.Class({
                     let boxLeft = this.listBoxes[box2.row][cleft].getComponent('Box')
                     if(boxLeft.square.color.equals(checkColor)) arrayTemp.push(boxLeft)
                     else cleft = -1
-                    --cleft
                 }
-                
                 if(cright < this.width){
                     let boxRight = this.listBoxes[box2.row][cright].getComponent('Box')
                     if(boxRight.square.color.equals(checkColor)) arrayTemp.push(boxRight)
                     else cright = this.width
-                    ++cright
                 }
+                --cleft
+                ++cright
                 if(arrayTemp.length == 0)break;
                 if(cleft < 0 && cright >= this.width){
                     if(arrayTemp.length >= 2){
@@ -348,14 +347,14 @@ cc.Class({
                     let boxUp = this.listBoxes[rup][box2.column].getComponent('Box')
                     if(boxUp.square.color.equals(checkColor)) arrayTemp.push(boxUp)
                     else rup = this.height
-                    ++rup
                 }
                 if(rdown >= 0){
                     let boxDown = this.listBoxes[rdown][box2.column].getComponent('Box')
                     if(boxDown.square.color.equals(checkColor)) arrayTemp.push(boxDown)
                     else rdown = -1
-                    --rdown
                 }
+                ++rup
+                --rdown
                 if(arrayTemp.length == 0)break;
                 if(rdown < 0 && rup >= this.height){
                     if(arrayTemp.length >= 2){

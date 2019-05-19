@@ -117,14 +117,21 @@ cc.Class({
         console.log("simulator lenght : " + isMatch.length)
         if(isMatch.length > 0)
         {
-            console.log('not match -> revert')
             window.game.swap(this.row, this.column, row, column)
-            this.isMoved = true
         }
         else
         {
-            boxSwap.goTo(this.row, this.column)
+            console.log('not match -> revert')
+            let isMatchofSwap = window.game.simulateNewPostion(boxSwap, this)
+            if(isMatchofSwap.length > 0)
+            {
+                window.game.swap(this.row, this.column, row, column)
+            }
+            else
+                console.log('all not match ')
         }
+
+        this.isMoved = true
     },
 
     destroySquare(){
