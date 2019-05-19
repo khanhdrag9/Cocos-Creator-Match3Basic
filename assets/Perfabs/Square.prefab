@@ -109,10 +109,7 @@
       "__id__": 1
     },
     "_enabled": true,
-    "row": -1,
-    "column": -1,
-    "origin_position": -1,
-    "speedMove": 0.3,
+    "moveDuration": 0.3,
     "_id": ""
   },
   {

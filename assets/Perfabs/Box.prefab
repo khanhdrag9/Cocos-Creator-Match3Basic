@@ -30,7 +30,7 @@
     "_prefab": {
       "__id__": 4
     },
-    "_opacity": 20,
+    "_opacity": 35,
     "_color": {
       "__type__": "cc.Color",
       "r": 255,
@@ -84,6 +84,8 @@
     "square": null,
     "column": 0,
     "row": 0,
+    "fadeDuration": 0.5,
+    "delayDuration": 0.3,
     "_id": ""
   },
   {

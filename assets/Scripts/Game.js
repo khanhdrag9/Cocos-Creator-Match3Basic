@@ -66,6 +66,7 @@ cc.Class({
     update (dt) {
         this.checkMatchAll()
         this.updatePositionSquare()
+        this.updateNewSquare()
     },
 
     getGrid(){
@@ -78,7 +79,7 @@ cc.Class({
         var x = startX
         var y = startY
 
-        for(let r = 0; r < this.height; r++)
+        for(let r = 0; r < this.height + 1; r++)
         {
             this.grid.push(new Array)
             for(let c = 0; c < this.width; c++)
@@ -93,13 +94,12 @@ cc.Class({
     },
 
     generateSquares(){
-        for(let row = 0; row < this.grid.length; row++)
+        for(let row = 0; row < this.height; row++)
         {
-            let inRow = this.grid[row]
             this.listBoxes.push(new Array)
-            for(let column = 0; column < inRow.length; column++)
+            for(let column = 0; column < this.width; column++)
             {
-                let position = inRow[column]
+                let position = this.grid[row][column]
                 let color = this.getColorInArray(this.squareTypes)
                 let box = this.createBoxAt(row, column, position, color)
                 this.listBoxes[row].push(box)
@@ -114,10 +114,6 @@ cc.Class({
         {
             boxCom.row = row
             boxCom.column = column
-            // boxCom.square = cc.instantiate(this.square)
-            // boxCom.square.color = color
-            // boxCom.square.setPosition(position)
-            // this.node.addChild(boxCom.square, 20)
             this.createSquareAt(boxCom, position, color)
 
         }
@@ -128,11 +124,16 @@ cc.Class({
     },
 
     //@boxCom is 'Box' object, toPosition is option - can be drop to gameboard
-    createSquareAt(boxCom, position, color){
+    createSquareAt(boxCom, position, color, toPosition = cc.v2(-1,-1)){
         boxCom.square = cc.instantiate(this.square)
         boxCom.square.color = color
         boxCom.square.setPosition(position)
         this.node.addChild(boxCom.square, 20)
+
+        if(!toPosition.equals(cc.v2(-1, -1)) && !toPosition.equals(position))
+        {
+            boxCom.square.getComponent('Square').moveToPosition(toPosition)
+        }
     },
 
     getColorInArray (array) {
@@ -143,12 +144,19 @@ cc.Class({
 
     checkMatchAll(){
         let deleteBoxes = new Array;
+        let stop = false;
 
         let lamdaCheckBox = (box1, box2, tempBoxes)=>{
             let length = tempBoxes.length
-            if(box1.square != null && box2.square != null)
+            if(box1.square != null && box2.square != null && 
+                !box1.square.getComponent('Square').died && !box2.square.getComponent('Square').died)
             {
-                if(box1.square.color.equals(box2.square.color))
+                // if(box1.square.getComponent('Square').moving || box2.square.getComponent('Square').moving)
+                // {
+                //     stop = true
+                //     return;
+                // }
+                 if(box1.square.color.equals(box2.square.color))
                 {
                     if(length == 0)tempBoxes.push(box1)
                     tempBoxes.push(box2)
@@ -187,6 +195,7 @@ cc.Class({
             {
                 let box1 = this.listBoxes[row][column - 1].getComponent('Box')
                 let box2= this.listBoxes[row][column].getComponent('Box')
+                if(stop)return;
                 tempBoxes = lamdaCheckBox(box1, box2, tempBoxes)
             }
 
@@ -207,6 +216,7 @@ cc.Class({
             {
                 let box1 = this.listBoxes[row-1][column].getComponent('Box')
                 let box2= this.listBoxes[row][column].getComponent('Box')
+                if(stop)return;
                 tempBoxes = lamdaCheckBox(box1, box2, tempBoxes)
             }
 
@@ -261,10 +271,37 @@ cc.Class({
             {
                 let box = p.box
                 if(box.row - p.count >= 0)
+                {
                     this.swap(box.row, box.column, box.row - p.count, box.column)
+                }
             }
         }, this)
+    },
 
+    updateNewSquare(){
+        let missedPosition = new Array
+        for(let column = 0; column < this.width; column++)
+        {
+            for(let row = 0; row < this.height; row++)
+            {
+                let box = this.listBoxes[row][column].getComponent('Box')
+                if(box.square == null)
+                {
+                    missedPosition.push(new GridPos(box.row, box.column))
+                }
+                else if(box.square.getComponent('Square').died)
+                {
+                    return;
+                }
+            }
+        }
+
+        missedPosition.forEach(function(gridPos){
+            let boxCom = this.listBoxes[gridPos.row][gridPos.column].getComponent('Box')
+            let positionCreate = this.grid[this.height][gridPos.column]
+            let color = this.getColorInArray(this.squareTypes)
+            this.createSquareAt(boxCom, positionCreate, color, boxCom.node.position)
+        }, this)
     },
 
     swap(row1, column1, row2, column2){

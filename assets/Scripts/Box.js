@@ -27,6 +27,10 @@ cc.Class({
             default: 0,
             visible: false
         },
+
+        fadeDuration: 0.75,
+        delayDuration: 0.75
+
     },
 
     onLoad(){
@@ -121,9 +125,9 @@ cc.Class({
     destroySquare(){
         if(this.square.getComponent('Square').died)return;
 
-        let action = cc.fadeTo(0.5, 50)
         let sequence = cc.sequence(
-            action,
+            cc.fadeTo(this.fadeDuration, 0),
+            cc.delayTime(this.delayDuration),
             cc.removeSelf(true),
             cc.callFunc(function(){
             this.square = null

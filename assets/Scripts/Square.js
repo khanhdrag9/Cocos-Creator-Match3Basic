@@ -13,23 +13,22 @@ cc.Class({
     extends: cc.Component,
 
     properties: {
-        speedMove : 0.2,
-        moving: false,
-        died: true
+        moveDuration : 0.5,
     },
 
     onLoad(){
         this.died = false
+        this.moving = false
     },
 
     moveToPosition(pos){
         if(this.died)return false
-        // let action = cc.moveTo(this.speedMove, pos)
+        // let action = cc.moveTo(this.moveDuration, pos)
         // if(this.node.getActionByTag(-1) == null)
         // {
             this.node.stopActionByTag(1)
             let action = cc.sequence(
-                cc.moveTo(this.speedMove, pos),
+                cc.moveTo(this.moveDuration, pos),
                 cc.callFunc(function(){
                     this.moving = false
                 }, this))
