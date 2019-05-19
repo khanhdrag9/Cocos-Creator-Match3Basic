@@ -19,12 +19,30 @@ GridPos.prototype.isNone = function(){
     return this.row == -1 || this.column == -1;
 }
 
+function DirectionAvaiable(_box, _direction){
+    this.direction = _direction
+    this.box = _box
+}
+DirectionAvaiable.prototype.handle = function(){
+    if(box instanceof Box)
+    {
+        let gridPos = new GridPos(-1,-1)
+        if(this.direction == 'left')gridPos = window.game.getIndexLeftOf(box)
+        if(this.direction == 'right')gridPos = window.game.getIndexRightOf(box)
+        if(this.direction == 'up')gridPos = window.game.getIndexUpOf(box)
+        if(this.direction == 'down')gridPos = window.game.getIndexDownOf(box)
+            
+        box.goTo(gridPos.row, gridPos.column, true)
+    }
+}
+
 cc.Class({
     extends: cc.Component,
 
     properties: {
         width: 10,
         height: 10,
+        delayTimeReset: 2,
 
         square: {
             default: null,
@@ -55,18 +73,42 @@ cc.Class({
     // LIFE-CYCLE CALLBACKS:
 
     onLoad () {
+        this.isResetBoard = false
+        this.hasUpdated = false;
         this.getGrid()        
         this.generateSquares()
         window.game=this;
 
         this.checkMatchAll()
         this.updatePositionSquare()
+        if(this.findAvaiableStep().length == 0)
+        {
+            console.log("reset")
+            this.isResetBoard = true;
+        }
     },
 
     update (dt) {
+        this.hasUpdated = false;
         this.checkMatchAll()
         this.updatePositionSquare()
         this.updateNewSquare()
+
+        if(this.hasUpdated)
+        {
+            let avaiableMove = this.findAvaiableStep()
+            if(!this.isResetBoard && avaiableMove.length == 0)
+            {
+                console.log("reset")
+                this.isResetBoard = true;
+            }
+            else if(avaiableMove.length > 0)
+            {
+                this.isResetBoard = false;
+            }
+
+            if(this.isResetBoard)this.resetBoard()
+        }
     },
 
     getGrid(){
@@ -105,6 +147,38 @@ cc.Class({
                 this.listBoxes[row].push(box)
             }
         }
+    },
+
+    resetBoard(){
+        let boxes = []
+        for(let row = 0; row < this.height; row++)
+        {
+            for(let column = 0; column < this.width; column++)
+            {
+                let boxCom = this.listBoxes[row][column].getComponent('Box')
+                if(boxCom.square == null)return;
+                let square = boxCom.square.getComponent('Square')
+                if(square.moving || square.died)return;
+
+                boxes.push(boxCom)
+                // this.createSquareAt(boxCom, boxCom.node.position, this.getColorInArray(this.squareTypes))
+            }
+        }
+
+        console.log("reset")
+        this.node.runAction(cc.sequence(cc.delayTime(this.delayTimeReset), cc.callFunc(function(){
+            if(this.isResetBoard)
+            {
+                boxes.forEach(function(box){
+                    box.destroySquare(true)
+                })
+                this.isResetBoard = false
+            }
+        }, this)))
+
+        // boxes.forEach(function(box){
+        //     box.destroySquare(true)
+        // })
     },
 
     createBoxAt (row, column, position, color) {
@@ -295,34 +369,37 @@ cc.Class({
                 }
             }
         }
-
         missedPosition.forEach(function(gridPos){
             let boxCom = this.listBoxes[gridPos.row][gridPos.column].getComponent('Box')
             let positionCreate = this.grid[this.height][gridPos.column]
             let color = this.getColorInArray(this.squareTypes)
             this.createSquareAt(boxCom, positionCreate, color, boxCom.node.position)
         }, this)
+
+        this.hasUpdated = true;
     },
 
     //@param box : Box object : box1 is mine, box2 to simulator
     simulateNewPostion(box1, box2){
         let arrayAvaiable = []
-        if(typeof box2 !== "undefined" && typeof box1 !== "undefined")
+        if(typeof box2 !== "undefined" && typeof box1 !== "undefined" && box1.square != null)
         {
             let checkColor = box1.square.color
             let arrayTemp = []
             //left-right
             let cleft = box2.column - 1
             let cright = box2.column + 1
+            if(box1.column < box2.column )cleft = -1
+            else if(box1.column > box2.column)cright = this.width
             while(true){
                 if(cleft >= 0){
                     let boxLeft = this.listBoxes[box2.row][cleft].getComponent('Box')
-                    if(boxLeft.square.color.equals(checkColor)) arrayTemp.push(boxLeft)
+                    if(boxLeft.square != null && boxLeft.square.color.equals(checkColor)) arrayTemp.push(boxLeft)
                     else cleft = -1
                 }
                 if(cright < this.width){
                     let boxRight = this.listBoxes[box2.row][cright].getComponent('Box')
-                    if(boxRight.square.color.equals(checkColor)) arrayTemp.push(boxRight)
+                    if(boxRight.square != null && boxRight.square.color.equals(checkColor)) arrayTemp.push(boxRight)
                     else cright = this.width
                 }
                 --cleft
@@ -342,15 +419,17 @@ cc.Class({
             //top-down
             let rup = box2.row + 1
             let rdown = box2.row - 1
+            if(box1.row < box2.row )rdown = -1
+            else if(box1.row > box2.row)rup = this.height
             while(true){
                 if(rup < this.height){
                     let boxUp = this.listBoxes[rup][box2.column].getComponent('Box')
-                    if(boxUp.square.color.equals(checkColor)) arrayTemp.push(boxUp)
+                    if(boxUp.square != null && boxUp.square.color.equals(checkColor)) arrayTemp.push(boxUp)
                     else rup = this.height
                 }
                 if(rdown >= 0){
                     let boxDown = this.listBoxes[rdown][box2.column].getComponent('Box')
-                    if(boxDown.square.color.equals(checkColor)) arrayTemp.push(boxDown)
+                    if(boxDown.square != null && boxDown.square.color.equals(checkColor)) arrayTemp.push(boxDown)
                     else rdown = -1
                 }
                 ++rup
@@ -374,8 +453,49 @@ cc.Class({
             // })
             
         }
+        return arrayAvaiable
+    },
 
-        console.log(arrayAvaiable)
+    findAvaiableStep(){
+        let arrayAvaiable = []
+
+        for(let row = 0; row < this.height - 1; row++)
+        {
+            for(let col = 0; col < this.width - 1; col++)
+            {
+                let boxMain = this.listBoxes[row][col].getComponent('Box')
+
+                if(col > 0){
+                    let boxLeft = this.listBoxes[row][col-1].getComponent('Box')
+                    if(typeof boxLeft !== "undefined" && this.simulateNewPostion(boxMain, boxLeft).length > 0)
+                        arrayAvaiable.push(new DirectionAvaiable(boxMain, 'left'))
+                }
+                if(col < this.width - 1){
+                    let boxRight = this.listBoxes[row][col+1].getComponent('Box')
+                    if(typeof boxRight !== "undefined" && this.simulateNewPostion(boxMain, boxRight).length > 0)
+                    arrayAvaiable.push(new DirectionAvaiable(boxMain, 'right'))
+                }
+                if(row < this.height - 1){
+                    let boxUp = this.listBoxes[row+1][col].getComponent('Box')
+                    if(typeof boxUp !== "undefined" && this.simulateNewPostion(boxMain, boxUp).length > 0)
+                    arrayAvaiable.push(new DirectionAvaiable(boxMain, 'up'))
+                }
+                if(row > 0)
+                {
+                    let boxDown = this.listBoxes[row-1][col].getComponent('Box')
+                    if(typeof boxDown !== "undefined" && this.simulateNewPostion(boxMain, boxDown).length > 0)
+                    arrayAvaiable.push(new DirectionAvaiable(boxMain, 'down'))
+                }
+            }
+        }
+
+        // //@TODO: only for test
+        // console.log("Avaiable : " + arrayAvaiable + "\nlength : " + arrayAvaiable.length)
+        // arrayAvaiable.forEach(function(DA){
+        //     console.log(DA)
+        //     DA.box.square.runAction(cc.scaleTo(1, 0.5, 0.5))
+        // })
+
         return arrayAvaiable
     },
 

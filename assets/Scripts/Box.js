@@ -109,44 +109,58 @@ cc.Class({
         }, this)
     },
 
-    goTo(row, column){
-        // window.game.swap(this.row, this.column, row, column)
-        // let isMatch = window.game.checkMatchAll()
-        let boxSwap = window.game.listBoxes[row][column].getComponent('Box')
-        let isMatch = window.game.simulateNewPostion(this, boxSwap)
-        console.log("simulator lenght : " + isMatch.length)
-        if(isMatch.length > 0)
+    goTo(row, column, skipCheck = false){
+        if(skipCheck)
         {
             window.game.swap(this.row, this.column, row, column)
         }
         else
         {
-            console.log('not match -> revert')
-            let isMatchofSwap = window.game.simulateNewPostion(boxSwap, this)
-            if(isMatchofSwap.length > 0)
+            let boxSwap = window.game.listBoxes[row][column].getComponent('Box')
+            let isMatch = window.game.simulateNewPostion(this, boxSwap)
+            console.log("simulator lenght : " + isMatch.length)
+            if(isMatch.length > 0)
             {
                 window.game.swap(this.row, this.column, row, column)
             }
             else
-                console.log('all not match ')
+            {
+                console.log('not match -> revert')
+                let isMatchofSwap = window.game.simulateNewPostion(boxSwap, this)
+                if(isMatchofSwap.length > 0)
+                {
+                    window.game.swap(this.row, this.column, row, column)
+                }
+                else
+                    console.log('all not match ')
+            }
         }
-
         this.isMoved = true
     },
 
-    destroySquare(){
+    destroySquare(immediate = false){
+        if(this.square == null)return;
         if(this.square.getComponent('Square').died)return;
 
-        let sequence = cc.sequence(
-            cc.fadeTo(this.fadeDuration, 0),
-            cc.delayTime(this.delayDuration),
-            cc.removeSelf(true),
-            cc.callFunc(function(){
+        if(immediate)
+        {
+            this.square.getComponent('Square').died = true
+            this.square.runAction(cc.removeSelf(true))
             this.square = null
-        }, this))
-        sequence.setTag(-1)
-        this.square.getComponent('Square').died = true
-        this.square.runAction(sequence)
+        }
+        else
+        {
+            let sequence = cc.sequence(
+                cc.fadeTo(this.fadeDuration, 0),
+                cc.delayTime(this.delayDuration),
+                cc.removeSelf(true),
+                cc.callFunc(function(){
+                this.square = null
+            }, this))
+            sequence.setTag(-1)
+            this.square.getComponent('Square').died = true
+            this.square.runAction(sequence)
+        }
         console.log("destroy")        
     }
 
