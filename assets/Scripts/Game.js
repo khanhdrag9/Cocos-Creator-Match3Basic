@@ -304,6 +304,82 @@ cc.Class({
         }, this)
     },
 
+    //@param box : Box object : box1 is mine, box2 to simulator
+    simulateNewPostion(box1, box2){
+        let arrayAvaiable = []
+        if(typeof box2 !== "undefined" && typeof box1 !== "undefined")
+        {
+            let checkColor = box1.square.color
+            let arrayTemp = []
+            //left-right
+            let cleft = box2.column - 1
+            let cright = box2.column + 1
+            while(true){
+                if(cleft >= 0){
+                    let boxLeft = this.listBoxes[box2.row][cleft].getComponent('Box')
+                    if(boxLeft.square.color.equals(checkColor)) arrayTemp.push(boxLeft)
+                    else cleft = -1
+                    --cleft
+                }
+                
+                if(cright < this.width){
+                    let boxRight = this.listBoxes[box2.row][cright].getComponent('Box')
+                    if(boxRight.square.color.equals(checkColor)) arrayTemp.push(boxRight)
+                    else cright = this.width
+                    ++cright
+                }
+                if(arrayTemp.length == 0)break;
+                if(cleft < 0 && cright >= this.width){
+                    if(arrayTemp.length >= 2){
+                        arrayTemp.forEach(function(box){
+                            arrayAvaiable.push(box)
+                        })
+                    }
+                    break;
+                } 
+            }
+            arrayTemp = []
+
+            //top-down
+            let rup = box2.row + 1
+            let rdown = box2.row - 1
+            while(true){
+                if(rup < this.height){
+                    let boxUp = this.listBoxes[rup][box2.column].getComponent('Box')
+                    if(boxUp.square.color.equals(checkColor)) arrayTemp.push(boxUp)
+                    else rup = this.height
+                    ++rup
+                }
+                if(rdown >= 0){
+                    let boxDown = this.listBoxes[rdown][box2.column].getComponent('Box')
+                    if(boxDown.square.color.equals(checkColor)) arrayTemp.push(boxDown)
+                    else rdown = -1
+                    --rdown
+                }
+                if(arrayTemp.length == 0)break;
+                if(rdown < 0 && rup >= this.height){
+                    if(arrayTemp.length >= 2){
+                        arrayTemp.forEach(function(box){
+                            arrayAvaiable.push(box)
+                        })
+                    }
+                    break;
+                } 
+            }
+
+
+            //@TODO: only for test result
+            // arrayAvaiable.forEach(function(box){
+            //         console.log("Scale test")
+            //         box.square.runAction(cc.scaleBy(1, 0.7, 0.7))
+            // })
+            
+        }
+
+        console.log(arrayAvaiable)
+        return arrayAvaiable
+    },
+
     swap(row1, column1, row2, column2){
         //move position
         let box1 = this.listBoxes[row1][column1].getComponent('Box')
@@ -360,5 +436,6 @@ cc.Class({
             return new GridPos(r, i.column)
         }
     },
+
 
 });

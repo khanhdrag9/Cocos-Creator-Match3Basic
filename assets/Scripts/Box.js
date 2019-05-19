@@ -63,8 +63,6 @@ cc.Class({
                         {
                             go = game.getIndexRightOf(this)
                         }
-
-                        console.log(go.row + " - " + go.column)
                         
                         if(go != null && go.isNone() == false)
                         {
@@ -112,14 +110,21 @@ cc.Class({
     },
 
     goTo(row, column){
-        window.game.swap(this.row, this.column, row, column)
-        let isMatch = window.game.checkMatchAll()
-        if(!isMatch)
+        // window.game.swap(this.row, this.column, row, column)
+        // let isMatch = window.game.checkMatchAll()
+        let boxSwap = window.game.listBoxes[row][column].getComponent('Box')
+        let isMatch = window.game.simulateNewPostion(this, boxSwap)
+        console.log("simulator lenght : " + isMatch.length)
+        if(isMatch.length > 0)
         {
             console.log('not match -> revert')
             window.game.swap(this.row, this.column, row, column)
+            this.isMoved = true
         }
-        this.isMoved = true
+        else
+        {
+            boxSwap.goTo(this.row, this.column)
+        }
     },
 
     destroySquare(){
