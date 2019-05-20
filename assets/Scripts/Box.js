@@ -48,7 +48,7 @@ cc.Class({
         }, this)
 
         this.node.on('touchmove', function(event){
-            if(!this.isMoved && this.square != null && !this.square.getComponent('Square').moving && !window.game.aiIsControlling)
+            if(!this.isMoved && this.square != null && !this.square.getComponent('Square').moving && !window.game.aiIsControlling && window.game.isStarted)
             {
                 let touchLocation = event.touch.getLocation()
                 let offset = cc.v2(touchLocation.x - this.touchBegin.x, touchLocation.y - this.touchBegin.y)
@@ -145,7 +145,7 @@ cc.Class({
         this.isMoved = true
     },
 
-    destroySquare(immediate = false){
+    destroySquare(destroyAll ,immediate = false){
         if(this.square == null)return;
         if(this.square.getComponent('Square').died)return;
 
@@ -172,21 +172,20 @@ cc.Class({
                     this.shields.pop()
                 }, this))
                 this.shields[this.shields.length - 1].runAction(sequence)
-                return false
+                if(!destroyAll)
+                    return false
             }
-            else
-            {
-                let sequence = cc.sequence(
-                    cc.fadeTo(this.fadeDuration, 0),
-                    cc.delayTime(this.delayDuration),
-                    cc.removeSelf(true),
-                    cc.callFunc(function(){
-                    this.square = null
-                }, this))
-                sequence.setTag(-1)
-                this.square.getComponent('Square').died = true
-                this.square.runAction(sequence)
-            }
+
+            let sequence = cc.sequence(
+                cc.fadeTo(this.fadeDuration, 0),
+                cc.delayTime(this.delayDuration),
+                cc.removeSelf(true),
+                cc.callFunc(function(){
+                this.square = null
+            }, this))
+            sequence.setTag(-1)
+            this.square.getComponent('Square').died = true
+            this.square.runAction(sequence)       
         }
         
         return true;

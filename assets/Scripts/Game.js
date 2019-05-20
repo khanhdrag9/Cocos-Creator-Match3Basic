@@ -235,7 +235,7 @@ cc.Class({
             if(this.isResetBoard)
             {
                 boxes.forEach(function(box){
-                    box.destroySquare(true)
+                    box.destroySquare(true, true)
                 })
                 this.isResetBoard = false
             }
@@ -367,7 +367,7 @@ cc.Class({
             let numberBox = 0
             boxes.forEach(function(box){
                 if(box instanceof Box){        
-                    if(box.destroySquare())
+                    if(box.destroySquare(true, false))
                         ++numberBox
                 }
             })
