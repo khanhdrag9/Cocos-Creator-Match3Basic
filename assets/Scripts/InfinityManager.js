@@ -17,7 +17,13 @@ cc.Class({
         textCountStep: {
             default: null,
             type: cc.Label
-        }
+        },
+        shield:{
+            default: null,
+            type: cc.Prefab
+        },
+        numberShields: 5,
+        destroyShieldDuration: 0.4
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -27,10 +33,34 @@ cc.Class({
         this.currentNumberStep = this.startNumberStep
         this.setTextForCountStep(this.currentNumberStep.toString())
 
-        console.log("manager")
+        this.initShields(this.numberShields)
     },
 
-    start () {
+    initShields(number){
+        for(let i = 0; i < number; ++i)
+        {
+            let listBoxes = window.game.listBoxes
+            let rowIndex = Math.floor(Math.random() * listBoxes.length)
+            let row = listBoxes[rowIndex]
+            if(typeof row !== "undefined")
+            {
+                let randomIndexC = Math.floor(Math.random() * row.length)
+                let boxShielded = row[randomIndexC]
+                if(typeof boxShielded !== "undefined")
+                    this.createShield(boxShielded.getComponent('Box'))
+            }
+        }
+    },
+
+    createShield(boxCom){
+        let nodeShield = cc.instantiate(this.shield)
+        if(nodeShield!= null)
+        {
+            nodeShield.setContentSize(window.game.sizeSquare)
+            boxCom.addShield(nodeShield)
+            // nodeShield.runAction(cc.repeatForever(cc.sequence(cc.fadeTo(2, 35), cc.fadeTo(2, 225))))
+        }
+        return nodeShield
     },
 
     resetStep(){

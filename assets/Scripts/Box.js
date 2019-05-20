@@ -18,6 +18,11 @@ cc.Class({
             type: cc.Node
         },
 
+        shields:{
+            default: [],
+            type: Node
+        },
+
         column:{
             default: 0,
             visible: false
@@ -149,21 +154,51 @@ cc.Class({
             this.square.getComponent('Square').died = true
             this.square.runAction(cc.removeSelf(true))
             this.square = null
+
+            this.shields.forEach(function(shield){
+                shield.destroy()
+            })
+            this.shields.splice(0, this.shields.length)
+            return true
         }
         else
         {
-            let sequence = cc.sequence(
-                cc.fadeTo(this.fadeDuration, 0),
-                cc.delayTime(this.delayDuration),
-                cc.removeSelf(true),
-                cc.callFunc(function(){
-                this.square = null
-            }, this))
-            sequence.setTag(-1)
-            this.square.getComponent('Square').died = true
-            this.square.runAction(sequence)
+            if(this.shields.length > 0)
+            {
+                let sequence = cc.sequence(
+                    cc.scaleBy(window.gamePlayManager.destroyShieldDuration, 2),
+                    cc.removeSelf(true),
+                    cc.callFunc(function(){
+                    this.shields.pop()
+                }, this))
+                this.shields[this.shields.length - 1].runAction(sequence)
+                return false
+            }
+            else
+            {
+                let sequence = cc.sequence(
+                    cc.fadeTo(this.fadeDuration, 0),
+                    cc.delayTime(this.delayDuration),
+                    cc.removeSelf(true),
+                    cc.callFunc(function(){
+                    this.square = null
+                }, this))
+                sequence.setTag(-1)
+                this.square.getComponent('Square').died = true
+                this.square.runAction(sequence)
+            }
         }
-        console.log("destroy")        
+        
+        return true;
+    },
+
+    addShield(shield){
+        if(shield != null)
+        {
+            this.shields.push(shield)
+            shield.position = window.game.grid[this.row][this.column]
+            window.game.node.addChild(shield, 30)
+        }
     }
 
 });

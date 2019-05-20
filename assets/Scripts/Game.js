@@ -364,12 +364,14 @@ cc.Class({
         }
 
         deleteBoxes.forEach(function(boxes){
-            this.increScore(boxes.length)
+            let numberBox = 0
             boxes.forEach(function(box){
                 if(box instanceof Box){        
-                    box.destroySquare()
+                    if(box.destroySquare())
+                        ++numberBox
                 }
             })
+            this.increScore(numberBox)
         }, this)
 
         if(deleteBoxes.length > 0)return true
@@ -621,6 +623,8 @@ cc.Class({
     },
 
     increScore(numberBox){
+        if(numberBox < 3)return
+
         let incre = this.minScore
         for(let i = 3; i < numberBox; ++i)
             incre+=incre

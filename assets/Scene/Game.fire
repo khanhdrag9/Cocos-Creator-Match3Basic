@@ -1401,11 +1401,15 @@
       "__id__": 32
     },
     "_enabled": true,
-    "theNumberStep": 25,
+    "startNumberStep": 25,
     "titleForCountStep": "Step : ",
     "textCountStep": {
       "__id__": 34
     },
+    "shield": {
+      "__uuid__": "638e96bd-90b7-4985-82c0-9c4d78f873bd"
+    },
+    "numberShields": 5,
     "_id": "dbIiry/L5JALVjGLLm11jg"
   },
   {
