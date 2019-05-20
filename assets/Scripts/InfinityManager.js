@@ -62,7 +62,7 @@ cc.Class({
         
     },
 
-    decreStep(value){
+    decreStep(value = 0){
         this.timeStep.progress = 1
     }
 });

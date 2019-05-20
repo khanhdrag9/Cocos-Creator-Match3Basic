@@ -32,6 +32,7 @@ DirectionAvaiable.prototype.handle = function(){
         if(this.direction == 'up')gridPos = window.game.getIndexUpOf(this.box)
         if(this.direction == 'down')gridPos = window.game.getIndexDownOf(this.box)
             
+        window.gamePlayManager.decreStep()
         this.box.goTo(gridPos.row, gridPos.column, true)
     }
 }
@@ -368,7 +369,10 @@ cc.Class({
             boxes.forEach(function(box){
                 if(box instanceof Box){        
                     if(box.destroySquare(true, false))
+                    {
                         ++numberBox
+                        window.gamePlayManager.decreStep()  //ONLY use for INFINITY mode!
+                    }
                 }
             })
             this.increScore(numberBox)
