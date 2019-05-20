@@ -13,7 +13,7 @@ cc.Class({
     extends: cc.Component,
 
     properties: {
-        moveDuration : 0.5,
+        moveDuration : 0.25,
     },
 
     onLoad(){

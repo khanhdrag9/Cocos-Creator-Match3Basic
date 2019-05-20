@@ -19,20 +19,21 @@ GridPos.prototype.isNone = function(){
     return this.row == -1 || this.column == -1;
 }
 
-function DirectionAvaiable(_box, _direction){
+function DirectionAvaiable(_box, _direction, _score){
     this.direction = _direction
     this.box = _box
+    this.score = _score
 }
 DirectionAvaiable.prototype.handle = function(){
-    if(box instanceof Box)
+    if(this.box instanceof Box)
     {
         let gridPos = new GridPos(-1,-1)
-        if(this.direction == 'left')gridPos = window.game.getIndexLeftOf(box)
-        if(this.direction == 'right')gridPos = window.game.getIndexRightOf(box)
-        if(this.direction == 'up')gridPos = window.game.getIndexUpOf(box)
-        if(this.direction == 'down')gridPos = window.game.getIndexDownOf(box)
+        if(this.direction == 'left')gridPos = window.game.getIndexLeftOf(this.box)
+        if(this.direction == 'right')gridPos = window.game.getIndexRightOf(this.box)
+        if(this.direction == 'up')gridPos = window.game.getIndexUpOf(this.box)
+        if(this.direction == 'down')gridPos = window.game.getIndexDownOf(this.box)
             
-        box.goTo(gridPos.row, gridPos.column, true)
+        this.box.goTo(gridPos.row, gridPos.column, true)
     }
 }
 
@@ -43,6 +44,7 @@ cc.Class({
         width: 10,
         height: 10,
         delayTimeReset: 2,
+        aiControll: false,
 
         square: {
             default: null,
@@ -63,6 +65,11 @@ cc.Class({
             type: cc.Color
         },
 
+        button: {
+            default: null,
+            type: cc.Button
+        },
+
         listBoxes: new Array,
 
         grid: new Array
@@ -75,6 +82,11 @@ cc.Class({
     onLoad () {
         this.isResetBoard = false
         this.hasUpdated = false;
+        this.delayTimeAction = 0
+        this.button.node.on('click', function(button){
+            this.aiControll = !this.aiControll
+        }, this)
+
         this.getGrid()        
         this.generateSquares()
         window.game=this;
@@ -91,7 +103,7 @@ cc.Class({
     update (dt) {
         this.hasUpdated = false;
         this.checkMatchAll()
-        this.updatePositionSquare()
+        let hasMoves = this.updatePositionSquare()
         this.updateNewSquare()
 
         if(this.hasUpdated)
@@ -104,11 +116,30 @@ cc.Class({
             }
             else if(avaiableMove.length > 0)
             {
+                //handle AI
+                if(this.aiControll && this.delayTimeAction == 0)
+                {
+                    // avaiableMove[Math.floor(Math.random()*avaiableMove.length)]
+                    this.aiControll = false
+                    this.node.runAction(cc.sequence(cc.delayTime(1), cc.callFunc(function(){
+                        let maxScoreMove = avaiableMove[0]
+                        avaiableMove.forEach(function(move){
+                            if(maxScoreMove.score < move.score)
+                                maxScoreMove = move
+                        })
+                        maxScoreMove.handle()
+                        console.log("AI handle score : " + maxScoreMove.score)
+                        this.aiControll = true
+                    }, this)))
+                }
                 this.isResetBoard = false;
             }
 
             if(this.isResetBoard)this.resetBoard()
         }
+
+        this.delayTimeAction -= dt
+        if(this.delayTimeAction < 0.0)this.delayTimeAction = 0.0
     },
 
     getGrid(){
@@ -340,16 +371,30 @@ cc.Class({
             }
         }
 
+        let hasAddedDelay = false
         array.forEach(function(p){
             if(p.box != null)
             {
                 let box = p.box
                 if(box.row - p.count >= 0)
                 {
+                    if(!hasAddedDelay && box.square != null)
+                    {
+                        this.delayTimeAction += box.square.getComponent('Square').moveDuration
+                        hasAddedDelay = true
+                    }
+                    else if(!hasAddedDelay && this.listBoxes[box.row - p.count][box.column].getComponent('Box').square != null){
+                        this.delayTimeAction += box.square.getComponent('Square').moveDuration
+                        hasAddedDelay = true
+                    }
+
                     this.swap(box.row, box.column, box.row - p.count, box.column)
                 }
             }
         }, this)
+
+        if(array > 0)return true;
+        else return false
     },
 
     updateNewSquare(){
@@ -369,11 +414,17 @@ cc.Class({
                 }
             }
         }
+
+        let hasAddedDelay = false
         missedPosition.forEach(function(gridPos){
             let boxCom = this.listBoxes[gridPos.row][gridPos.column].getComponent('Box')
             let positionCreate = this.grid[this.height][gridPos.column]
             let color = this.getColorInArray(this.squareTypes)
             this.createSquareAt(boxCom, positionCreate, color, boxCom.node.position)
+            if(!hasAddedDelay){
+                this.delayTimeAction += boxCom.square.getComponent('Square').moveDuration
+                hasAddedDelay = true
+            }
         }, this)
 
         this.hasUpdated = true;
@@ -467,24 +518,32 @@ cc.Class({
 
                 if(col > 0){
                     let boxLeft = this.listBoxes[row][col-1].getComponent('Box')
-                    if(typeof boxLeft !== "undefined" && this.simulateNewPostion(boxMain, boxLeft).length > 0)
-                        arrayAvaiable.push(new DirectionAvaiable(boxMain, 'left'))
+                    if(typeof boxLeft !== "undefined"){
+                        let simu = this.simulateNewPostion(boxMain, boxLeft)
+                        if(simu.length > 0)arrayAvaiable.push(new DirectionAvaiable(boxMain, 'left', simu.length))
+                    }
                 }
                 if(col < this.width - 1){
                     let boxRight = this.listBoxes[row][col+1].getComponent('Box')
-                    if(typeof boxRight !== "undefined" && this.simulateNewPostion(boxMain, boxRight).length > 0)
-                    arrayAvaiable.push(new DirectionAvaiable(boxMain, 'right'))
+                    if(typeof boxRight !== "undefined"){
+                        let simu = this.simulateNewPostion(boxMain, boxRight)
+                        if(simu.length > 0)arrayAvaiable.push(new DirectionAvaiable(boxMain, 'right', simu.length))
+                    } 
                 }
                 if(row < this.height - 1){
                     let boxUp = this.listBoxes[row+1][col].getComponent('Box')
-                    if(typeof boxUp !== "undefined" && this.simulateNewPostion(boxMain, boxUp).length > 0)
-                    arrayAvaiable.push(new DirectionAvaiable(boxMain, 'up'))
+                    if(typeof boxUp !== "undefined"){
+                        let simu = this.simulateNewPostion(boxMain, boxUp)
+                        if(simu.length > 0)arrayAvaiable.push(new DirectionAvaiable(boxMain, 'up', simu.length))
+                    } 
                 }
                 if(row > 0)
                 {
                     let boxDown = this.listBoxes[row-1][col].getComponent('Box')
-                    if(typeof boxDown !== "undefined" && this.simulateNewPostion(boxMain, boxDown).length > 0)
-                    arrayAvaiable.push(new DirectionAvaiable(boxMain, 'down'))
+                    if(typeof boxDown !== "undefined"){
+                        let simu = this.simulateNewPostion(boxMain, boxDown)
+                        if(simu.length > 0)arrayAvaiable.push(new DirectionAvaiable(boxMain, 'down', simu.length))
+                    } 
                 }
             }
         }
@@ -507,17 +566,20 @@ cc.Class({
         //2 position is used to swap
         let position1 = box1.node.position
         let position2 = box2.node.position
-
         if(box1.square != null)
         {
             let square1 = box1.square.getComponent('Square')
-            if(square1 != null)square1.moveToPosition(position2)
+            if(square1 != null){
+                square1.moveToPosition(position2)
+            }
         }
 
         if(box2.square != null)
         {
             let square2 = box2.square.getComponent('Square')
-            if(square2 != null)square2.moveToPosition(position1)
+            if(square2 != null){
+                square2.moveToPosition(position1)
+            }
         }
 
         //change index
