@@ -34,7 +34,7 @@ cc.Class({
         if(this.ButtonInfinityMode != null)
         {
             this.ButtonInfinityMode.node.on('click', function(button){
-                
+                cc.director.loadScene('GameInfinity')
             }, this)
         }
         
