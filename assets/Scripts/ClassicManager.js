@@ -18,6 +18,10 @@ cc.Class({
             default: null,
             type: cc.Label
         },
+        resultLabel:{
+            default: null,
+            type: cc.Label
+        },
         shield:{
             default: null,
             type: cc.Prefab
@@ -89,12 +93,31 @@ cc.Class({
 
     defeat(){
         console.log("defeat!")
-        window.game.isStarted = false
+        this.setResult()
+        window.game.textScore.node.destroy()
+        if(this.resultLabel!=null)
+        {
+            this.resultLabel.string = "DEFEAT\n"
+        }
     },
 
     victory(){
         console.log("victory!")
+        this.setResult()
+        let score = window.game.textScore.string
+        window.game.textScore.node.destroy()
+        if(this.resultLabel!=null)
+        {
+            this.resultLabel.string = "VICTORY\n" + score.toString()
+        }
+    },
+
+    setResult(){
         window.game.isStarted = false
+        window.game.isResetBoard = true
+        window.game.resetBoard(true)
+        this.textCountStep.node.destroy()
+        window.game.button.node.destroy()
     },
 
     setTextForCountStep(str){

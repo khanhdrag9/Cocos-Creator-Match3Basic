@@ -16,6 +16,11 @@ cc.Class({
             default: null,
             type: cc.ProgressBar
         },
+        resultLabel:{
+            default: null,
+            type: cc.Label
+        },
+
         durationShowBar : 1,
         startTime : 15,
         minTime : 3
@@ -35,6 +40,16 @@ cc.Class({
     defeat(){
         console.log("defeat!")
         window.game.isStarted = false
+        window.game.isResetBoard = true
+        window.game.resetBoard(true)
+        let score = window.game.textScore.string
+        window.game.textScore.node.destroy()
+        window.game.button.node.destroy()
+        if(this.resultLabel!=null)
+        {
+            this.resultLabel.string = "DEFEAT\n" + score.toString()
+        }
+
     },
 
     update (dt) {

@@ -220,24 +220,28 @@ cc.Class({
         }
     },
 
-    resetBoard(){
+    resetBoard(immediate = false){
         let boxes = []
         for(let row = 0; row < this.height; row++)
         {
             for(let column = 0; column < this.width; column++)
             {
                 let boxCom = this.listBoxes[row][column].getComponent('Box')
-                if(boxCom.square == null)return;
-                let square = boxCom.square.getComponent('Square')
-                if(square.moving || square.died)return;
-
-                boxes.push(boxCom)
+                if(boxCom.square == null && this.isStarted)return;
+                else if(boxCom.square != null)
+                {
+                    let square = boxCom.square.getComponent('Square')
+                    if(immediate && !square.died)boxes.push(boxCom)
+                    else if((square.moving || square.died) && this.isStarted)return;
+                    else if(!square.moving && !square.died)boxes.push(boxCom)
+                }
                 // this.createSquareAt(boxCom, boxCom.node.position, this.getColorInArray(this.squareTypes))
             }
         }
 
         console.log("reset")
-        this.node.runAction(cc.sequence(cc.delayTime(this.delayTimeReset), cc.callFunc(function(){
+        let delay = immediate ? 0 : this.delayTimeReset
+        this.node.runAction(cc.sequence(cc.delayTime(delay), cc.callFunc(function(){
             if(this.isResetBoard)
             {
                 boxes.forEach(function(box){
