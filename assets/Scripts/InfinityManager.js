@@ -57,7 +57,6 @@ cc.Class({
         else
         {
             this.currentTime = this.startTime - Math.floor(window.game.score / 1000)
-            console.log("currentTime : " + this.currentTime)
             this.timeStep.progress -= (dt / this.currentTime)    
         }
         
