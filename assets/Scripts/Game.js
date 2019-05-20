@@ -83,8 +83,11 @@ cc.Class({
         this.isResetBoard = false
         this.hasUpdated = false;
         this.delayTimeAction = 0
+        this.aiIsControlling = false
+
         this.button.node.on('click', function(button){
             this.aiControll = !this.aiControll
+            this.aiIsControlling = !this.aiIsControlling
         }, this)
 
         this.getGrid()        
@@ -122,14 +125,17 @@ cc.Class({
                     // avaiableMove[Math.floor(Math.random()*avaiableMove.length)]
                     this.aiControll = false
                     this.node.runAction(cc.sequence(cc.delayTime(1), cc.callFunc(function(){
-                        let maxScoreMove = avaiableMove[0]
-                        avaiableMove.forEach(function(move){
-                            if(maxScoreMove.score < move.score)
-                                maxScoreMove = move
-                        })
-                        maxScoreMove.handle()
-                        console.log("AI handle score : " + maxScoreMove.score)
-                        this.aiControll = true
+                        if(this.aiIsControlling)
+                        {
+                            let maxScoreMove = avaiableMove[0]
+                            avaiableMove.forEach(function(move){
+                                if(maxScoreMove.score < move.score)
+                                    maxScoreMove = move
+                            })
+                            maxScoreMove.handle()
+                            console.log("AI handle score : " + maxScoreMove.score)
+                            this.aiControll = true
+                        }
                     }, this)))
                 }
                 this.isResetBoard = false;

@@ -43,7 +43,7 @@ cc.Class({
         }, this)
 
         this.node.on('touchmove', function(event){
-            if(!this.isMoved && this.square != null && !this.square.getComponent('Square').moving)
+            if(!this.isMoved && this.square != null && !this.square.getComponent('Square').moving && !window.game.aiIsControlling)
             {
                 let touchLocation = event.touch.getLocation()
                 let offset = cc.v2(touchLocation.x - this.touchBegin.x, touchLocation.y - this.touchBegin.y)
