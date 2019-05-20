@@ -9,6 +9,8 @@
 //  - [English] https://www.cocos2d-x.org/docs/creator/manual/en/scripting/life-cycle-callbacks.html
 'use strict';
 import Box from './Box.js'
+import InfinityManager from './InfinityManager.js'
+import ClassicManager from './ClassicManager.js'
 
 function GridPos(_row, _column) {
     this.row = _row
@@ -31,8 +33,9 @@ DirectionAvaiable.prototype.handle = function(){
         if(this.direction == 'right')gridPos = window.game.getIndexRightOf(this.box)
         if(this.direction == 'up')gridPos = window.game.getIndexUpOf(this.box)
         if(this.direction == 'down')gridPos = window.game.getIndexDownOf(this.box)
-            
-        window.gamePlayManager.decreStep()
+        
+        if(window.gamePlayManager instanceof ClassicManager)
+            window.gamePlayManager.decreStep(1)
         this.box.goTo(gridPos.row, gridPos.column, true)
     }
 }
@@ -46,6 +49,7 @@ cc.Class({
         delayTimeReset: 2,
         aiControll: false,
         timeAIDelay: 1,
+        extraSquareActionDelay: 1,
 
         square: {
             default: null,
@@ -85,6 +89,7 @@ cc.Class({
         },
         titleForScore: "Score: ",
         minScore: 30,
+        
     },
 
 
@@ -364,17 +369,25 @@ cc.Class({
             tempBoxes = new Array
         }
 
+        let addedDelayTime = false
         deleteBoxes.forEach(function(boxes){
             let numberBox = 0
             boxes.forEach(function(box){
                 if(box instanceof Box){        
                     if(box.destroySquare(true, false))
                     {
+                        if(!addedDelayTime)
+                        {
+                            this.delayTimeAction += (box.fadeDuration + box.delayDuration)
+                            this.delayTimeAction *= this.extraSquareActionDelay
+                            addedDelayTime = true
+                        }
                         ++numberBox
-                        window.gamePlayManager.decreStep()  //ONLY use for INFINITY mode!
+                        if(window.gamePlayManager instanceof InfinityManager)
+                            window.gamePlayManager.resetCountTimeProgress()  //ONLY use for INFINITY mode!
                     }
                 }
-            })
+            }, this)
             this.increScore(numberBox)
         }, this)
 
@@ -418,10 +431,12 @@ cc.Class({
                     if(!hasAddedDelay && box.square != null)
                     {
                         this.delayTimeAction += box.square.getComponent('Square').moveDuration
+                        this.delayTimeAction *= this.extraSquareActionDelay
                         hasAddedDelay = true
                     }
                     else if(!hasAddedDelay && this.listBoxes[box.row - p.count][box.column].getComponent('Box').square != null){
                         this.delayTimeAction += box.square.getComponent('Square').moveDuration
+                        this.delayTimeAction *= this.extraSquareActionDelay
                         hasAddedDelay = true
                     }
 
@@ -460,6 +475,7 @@ cc.Class({
             this.createSquareAt(boxCom, positionCreate, color, boxCom.node.position)
             if(!hasAddedDelay){
                 this.delayTimeAction += boxCom.square.getComponent('Square').moveDuration
+                this.delayTimeAction *= this.extraSquareActionDelay
                 hasAddedDelay = true
             }
         }, this)

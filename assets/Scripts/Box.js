@@ -8,6 +8,7 @@
 //  - [Chinese] https://docs.cocos.com/creator/manual/zh/scripting/life-cycle-callbacks.html
 //  - [English] https://www.cocos2d-x.org/docs/creator/manual/en/scripting/life-cycle-callbacks.html
 'use strict';
+import ClassicManager from './ClassicManager.js'
 
 cc.Class({
     extends: cc.Component,
@@ -33,8 +34,8 @@ cc.Class({
             visible: false
         },
 
-        fadeDuration: 0.75,
-        delayDuration: 0.75
+        fadeDuration: 0.2,
+        delayDuration: 0.1
 
     },
 
@@ -48,7 +49,8 @@ cc.Class({
         }, this)
 
         this.node.on('touchmove', function(event){
-            if(!this.isMoved && this.square != null && !this.square.getComponent('Square').moving && !window.game.aiIsControlling && window.game.isStarted)
+            if(!this.isMoved && this.square != null && !this.square.getComponent('Square').moving && !window.game.aiIsControlling && window.game.isStarted 
+            && window.game.delayTimeAction <= 0)
             {
                 let touchLocation = event.touch.getLocation()
                 let offset = cc.v2(touchLocation.x - this.touchBegin.x, touchLocation.y - this.touchBegin.y)
@@ -71,7 +73,10 @@ cc.Class({
                         
                         if(go != null && go.isNone() == false)
                         {
-                            window.gamePlayManager.decreStep(1)
+                            if(window.gamePlayManager instanceof ClassicManager)
+                            {
+                                window.gamePlayManager.decreStep(1)
+                            }
                             this.goTo(go.row, go.column)
                         }
                     }
@@ -94,7 +99,8 @@ cc.Class({
                         
                         if(go != null && go.isNone() == false)
                         {
-                            window.gamePlayManager.decreStep(1)
+                            if(window.gamePlayManager instanceof ClassicManager)
+                                window.gamePlayManager.decreStep(1)
                             this.goTo(go.row, go.column)
                         }
                     }
@@ -165,12 +171,16 @@ cc.Class({
         {
             if(this.shields.length > 0)
             {
+                let shieldDestroyDuration = 1
+                if(window.gamePlayManager instanceof ClassicManager)
+                    shieldDestroyDuration = window.gamePlayManager.destroyShieldDuration
                 let sequence = cc.sequence(
-                    cc.scaleBy(window.gamePlayManager.destroyShieldDuration, 2),
+                    cc.scaleBy(shieldDestroyDuration, 2),
                     cc.removeSelf(true),
                     cc.callFunc(function(){
                     this.shields.pop()
-                    window.gamePlayManager.currentShields--
+                    if(typeof window.gamePlayManager.currentShields !== "undefined")
+                        window.gamePlayManager.currentShields--
                 }, this))
                 this.shields[this.shields.length - 1].runAction(sequence)
                 if(!destroyAll)

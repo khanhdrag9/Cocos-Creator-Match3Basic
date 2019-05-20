@@ -82,9 +82,10 @@
     },
     "_enabled": true,
     "square": null,
+    "shields": [],
     "column": 0,
     "row": 0,
-    "fadeDuration": 0.5,
+    "fadeDuration": 0.3,
     "delayDuration": 0.3,
     "_id": ""
   },
