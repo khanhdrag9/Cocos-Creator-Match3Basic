@@ -170,6 +170,7 @@ cc.Class({
                     cc.removeSelf(true),
                     cc.callFunc(function(){
                     this.shields.pop()
+                    window.gamePlayManager.currentShields--
                 }, this))
                 this.shields[this.shields.length - 1].runAction(sequence)
                 if(!destroyAll)

@@ -31,6 +31,7 @@ cc.Class({
     onLoad () {
         window.gamePlayManager = this
         this.currentNumberStep = this.startNumberStep
+        this.currentShields = this.numberShields
         this.setTextForCountStep(this.currentNumberStep.toString())
 
         this.initShields(this.numberShields)
@@ -74,12 +75,31 @@ cc.Class({
         this.setTextForCountStep(this.currentNumberStep.toString())
     },
 
+    defeat(){
+        console.log("defeat!")
+        window.game.isStarted = false
+    },
+
+    victory(){
+        console.log("victory!")
+        window.game.isStarted = false
+    },
+
     setTextForCountStep(str){
         if(this.textCountStep!=null)
         {
             this.textCountStep.string = this.titleForCountStep + str
         }
-    }
+    },
 
-    // update (dt) {},
+    update (dt) {
+        if(this.currentShields <= 0 && window.game.isStarted)
+        {
+            this.victory()
+        }
+        else if(this.currentNumberStep == 0 && window.game.isStarted)
+        {
+            this.defeat()
+        }
+    },
 });
