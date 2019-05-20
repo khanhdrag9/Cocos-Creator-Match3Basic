@@ -66,6 +66,7 @@ cc.Class({
                         
                         if(go != null && go.isNone() == false)
                         {
+                            window.gamePlayManager.decreStep(1)
                             this.goTo(go.row, go.column)
                         }
                     }
@@ -88,6 +89,7 @@ cc.Class({
                         
                         if(go != null && go.isNone() == false)
                         {
+                            window.gamePlayManager.decreStep(1)
                             this.goTo(go.row, go.column)
                         }
                     }

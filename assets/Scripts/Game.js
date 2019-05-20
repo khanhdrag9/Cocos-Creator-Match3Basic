@@ -44,6 +44,7 @@ cc.Class({
         height: 10,
         delayTimeReset: 2,
         aiControll: false,
+        timeAIDelay: 1,
 
         square: {
             default: null,
@@ -76,7 +77,13 @@ cc.Class({
         textCountStart:{
             default: null,
             type: cc.Label
-        }
+        },
+        textScore: {
+            default: null,
+            type: cc.Label
+        },
+        titleForScore: "Score: ",
+        minScore: 30,
     },
 
 
@@ -89,6 +96,7 @@ cc.Class({
         this.hasUpdated = false;
         this.delayTimeAction = 0
         this.aiIsControlling = false
+        this.score = 0
 
         this.button.node.on('click', function(button){
             this.aiControll = !this.aiControll
@@ -119,7 +127,6 @@ cc.Class({
             this.isStarted = true
         }, this))
         this.node.runAction(action)
-
     },
 
     update (dt) {
@@ -145,7 +152,7 @@ cc.Class({
                 {
                     // avaiableMove[Math.floor(Math.random()*avaiableMove.length)]
                     this.aiControll = false
-                    this.node.runAction(cc.sequence(cc.delayTime(1), cc.callFunc(function(){
+                    this.node.runAction(cc.sequence(cc.delayTime(this.timeAIDelay), cc.callFunc(function(){
                         if(this.aiIsControlling)
                         {
                             let maxScoreMove = avaiableMove[0]
@@ -233,10 +240,6 @@ cc.Class({
                 this.isResetBoard = false
             }
         }, this)))
-
-        // boxes.forEach(function(box){
-        //     box.destroySquare(true)
-        // })
     },
 
     createBoxAt (row, column, position, color) {
@@ -361,12 +364,13 @@ cc.Class({
         }
 
         deleteBoxes.forEach(function(boxes){
+            this.increScore(boxes.length)
             boxes.forEach(function(box){
                 if(box instanceof Box){        
                     box.destroySquare()
                 }
             })
-        })
+        }, this)
 
         if(deleteBoxes.length > 0)return true
         else return false
@@ -614,6 +618,16 @@ cc.Class({
         box1.square = box2.square
         box2.square = tempSquare
 
+    },
+
+    increScore(numberBox){
+        let incre = this.minScore
+        for(let i = 3; i < numberBox; ++i)
+            incre+=incre
+        this.score += incre
+        console.log("Received : " + incre + " points")
+        if(this.textScore != null)
+            this.textScore.string = this.titleForScore + this.score.toString()
     },
 
     getTextSequenceDelayTime(textObject, textStr, delay){
