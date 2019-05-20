@@ -34,14 +34,14 @@ cc.Class({
         if(this.ButtonInfinityMode != null)
         {
             this.ButtonInfinityMode.node.on('click', function(button){
-                cc.director.loadScene("Game")
+                
             }, this)
         }
         
         if(this.ButtonClassicMode != null)
         {
             this.ButtonClassicMode.node.on('click', function(button){
-
+                cc.director.loadScene("Game")
             }, this)
         }
 

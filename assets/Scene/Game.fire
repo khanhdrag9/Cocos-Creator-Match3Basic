@@ -1409,7 +1409,7 @@
     "shield": {
       "__uuid__": "638e96bd-90b7-4985-82c0-9c4d78f873bd"
     },
-    "numberShields": 15,
+    "numberShields": 50,
     "destroyShieldDuration": 0.4,
     "_id": "dbIiry/L5JALVjGLLm11jg"
   },
@@ -1525,8 +1525,8 @@
       "__id__": 2
     },
     "_enabled": true,
-    "width": 7,
-    "height": 7,
+    "width": 10,
+    "height": 10,
     "delayTimeReset": 2,
     "aiControll": false,
     "timeAIDelay": 0.5,
