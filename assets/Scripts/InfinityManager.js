@@ -38,7 +38,8 @@ cc.Class({
     },
 
     initShields(number){
-        for(let i = 0; i < number; ++i)
+        let history = []
+        for(let i = 0; i < number;)
         {
             let listBoxes = window.game.listBoxes
             let rowIndex = Math.floor(Math.random() * listBoxes.length)
@@ -46,9 +47,20 @@ cc.Class({
             if(typeof row !== "undefined")
             {
                 let randomIndexC = Math.floor(Math.random() * row.length)
-                let boxShielded = row[randomIndexC]
-                if(typeof boxShielded !== "undefined")
-                    this.createShield(boxShielded.getComponent('Box'))
+                if(!history.find(index => {
+                    return index.equals(cc.v2(rowIndex, randomIndexC))})
+                    )
+                {
+                    let boxShielded = row[randomIndexC]
+                    if(typeof boxShielded !== "undefined")
+                    {
+                        this.createShield(boxShielded.getComponent('Box'))
+                        ++i
+                        history.push(cc.v2(rowIndex, randomIndexC))
+                    }
+                }
+                else
+                    console.log("dupp")
             }
         }
     },

@@ -1409,7 +1409,8 @@
     "shield": {
       "__uuid__": "638e96bd-90b7-4985-82c0-9c4d78f873bd"
     },
-    "numberShields": 5,
+    "numberShields": 15,
+    "destroyShieldDuration": 0.4,
     "_id": "dbIiry/L5JALVjGLLm11jg"
   },
   {
