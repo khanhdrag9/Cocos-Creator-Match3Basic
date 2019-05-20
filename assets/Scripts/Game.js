@@ -8,7 +8,6 @@
 //  - [Chinese] https://docs.cocos.com/creator/manual/zh/scripting/life-cycle-callbacks.html
 //  - [English] https://www.cocos2d-x.org/docs/creator/manual/en/scripting/life-cycle-callbacks.html
 'use strict';
-import Square from './Square.js'
 import Box from './Box.js'
 
 function GridPos(_row, _column) {
@@ -72,7 +71,12 @@ cc.Class({
 
         listBoxes: new Array,
 
-        grid: new Array
+        grid: new Array,
+
+        textCountStart:{
+            default: null,
+            type: cc.Label
+        }
     },
 
 
@@ -80,6 +84,7 @@ cc.Class({
     // LIFE-CYCLE CALLBACKS:
 
     onLoad () {
+        this.isStarted = false
         this.isResetBoard = false
         this.hasUpdated = false;
         this.delayTimeAction = 0
@@ -94,16 +99,32 @@ cc.Class({
         this.generateSquares()
         window.game=this;
 
-        this.checkMatchAll()
-        this.updatePositionSquare()
-        if(this.findAvaiableStep().length == 0)
+        // this.checkMatchAll()
+        // this.updatePositionSquare()
+        while(this.findAvaiableStep().length == 0)
         {
             console.log("reset")
-            this.isResetBoard = true;
+            // this.isResetBoard = true;
+            this.resetBoard()
         }
+
+        let count3 = this.getTextSequenceDelayTime(this.textCountStart, "3", 1)
+        let count2 = this.getTextSequenceDelayTime(this.textCountStart, "2", 1)
+        let count1 = this.getTextSequenceDelayTime(this.textCountStart, "1", 1)
+        let startText = this.getTextSequenceDelayTime(this.textCountStart, "Start!", 1)
+
+        let action = cc.sequence(count3, count2, count1, startText, cc.callFunc(function(){
+            console.log("startGame")
+            this.textCountStart.node.destroy()
+            this.isStarted = true
+        }, this))
+        this.node.runAction(action)
+
     },
 
     update (dt) {
+        if(!this.isStarted)return
+
         this.hasUpdated = false;
         this.checkMatchAll()
         let hasMoves = this.updatePositionSquare()
@@ -593,6 +614,17 @@ cc.Class({
         box1.square = box2.square
         box2.square = tempSquare
 
+    },
+
+    getTextSequenceDelayTime(textObject, textStr, delay){
+        let sequence = cc.sequence(cc.callFunc(function(){
+            if(typeof textObject !== "undefined" && textObject!=null){
+                textObject.string = textStr
+                textObject.node.opacity = 255
+                textObject.node.runAction(cc.fadeTo(delay * 0.75, 0))
+            }
+        }, this), cc.delayTime(delay))
+        return sequence
     },
 
     getIndexLeftOf(i){
