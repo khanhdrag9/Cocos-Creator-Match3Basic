@@ -77,6 +77,8 @@ cc.Class({
                             {
                                 window.gamePlayManager.decreStep(1)
                             }
+                            if(typeof window.suggestion !== "undefined")
+                                window.suggestion.deleteSuggest()
                             this.goTo(go.row, go.column)
                         }
                     }
@@ -101,6 +103,8 @@ cc.Class({
                         {
                             if(window.gamePlayManager instanceof ClassicManager)
                                 window.gamePlayManager.decreStep(1)
+                            if(typeof window.suggestion !== "undefined")
+                                window.suggestion.deleteSuggest()
                             this.goTo(go.row, go.column)
                         }
                     }

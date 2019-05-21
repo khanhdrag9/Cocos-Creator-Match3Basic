@@ -45,6 +45,8 @@ cc.Class({
         let score = window.game.textScore.string
         window.game.textScore.node.destroy()
         window.game.button.node.destroy()
+        if(typeof window.suggestion !== "undefined")
+            window.suggestion.node.destroy()
         if(this.resultLabel!=null)
         {
             this.resultLabel.string = "DEFEAT\n" + score.toString()

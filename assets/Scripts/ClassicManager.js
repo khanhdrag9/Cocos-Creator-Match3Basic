@@ -118,6 +118,8 @@ cc.Class({
         window.game.resetBoard(true)
         this.textCountStep.node.destroy()
         window.game.button.node.destroy()
+        if(typeof window.suggestion !== "undefined")
+            window.suggestion.node.destroy()
     },
 
     setTextForCountStep(str){
