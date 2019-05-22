@@ -2047,6 +2047,7 @@
     "aiControll": false,
     "timeAIDelay": 0.5,
     "extraSquareActionDelay": 1,
+    "noneMatchAtFirstTime": true,
     "square": {
       "__uuid__": "cc0a13b7-b099-4fa6-abac-583c731fa22f"
     },

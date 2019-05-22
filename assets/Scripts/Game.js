@@ -50,6 +50,7 @@ cc.Class({
         aiControll: false,
         timeAIDelay: 1,
         extraSquareActionDelay: 1,
+        noneMatchAtFirstTime: false,
 
         square: {
             default: null,
@@ -148,7 +149,6 @@ cc.Class({
             let avaiableMove = this.findAvaiableStep()
             if(!this.isResetBoard && avaiableMove.length == 0)
             {
-                console.log("reset")
                 this.isResetBoard = true;
             }
             else if(avaiableMove.length > 0)
@@ -207,6 +207,110 @@ cc.Class({
     },
 
     generateSquares(){
+        if(this.noneMatchAtFirstTime)
+        {
+            this.generateSquaresNotMatch()
+        }
+        else {
+            this.generateSquaresRandom()
+        }   
+    },
+
+    generateSquaresNotMatch(){
+        for(let row = 0; row < this.height; row++)  //create box
+        {
+            this.listBoxes.push(new Array)
+            for(let column = 0; column < this.width; column++)
+            {
+                let position = this.grid[row][column]
+                let color = this.getColorInArray(this.squareTypes)
+                let box = this.createBoxAt(row, column, position, color)
+                this.listBoxes[row].push(box)
+            }
+        }
+
+        let shuffleArray = array =>{
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];    //swap
+            }
+            return array;
+        }
+
+        let isMatch = (color, row, column) =>{
+            let isSameColorAt = (cColor, cr, cc) => {
+                let box = this.listBoxes[cr][cc]
+                if(typeof box !== "undefined" && box != null && box.getComponent('Box').square != null)
+                {
+                    if(box.getComponent('Box').square.color.equals(cColor))return true
+                    else return false
+                }
+                else
+                    return false
+            }
+            //check column
+            let countSame = 1
+            let left = column - 1
+            let right = column + 1
+            while(true){
+                if(left >= 0)
+                    if(isSameColorAt(color, row, left))countSame++
+                    else left = -1
+                if(right < this.width)
+                    if(isSameColorAt(color, row, right))countSame++
+                    else right = this.width
+                if(countSame >= 3)break;
+                if(left < 0 && right >= this.width)
+                    break;
+                --left
+                ++right
+            }
+            if(countSame >= 3)return true
+            //check row
+            countSame = 1
+            let up = row + 1
+            let down = row - 1
+            while(true){
+                if(down >= 0)
+                    if(isSameColorAt(color, down, column))countSame++
+                    else down = -1
+                if(up < this.height)
+                    if(isSameColorAt(color, up, column))countSame++
+                    else up = this.height
+                if(countSame >= 3)break;
+                if(down < 0 && up >= this.height)
+                    break;
+                ++up
+                --down
+            }
+            if(countSame >= 3)return true
+        
+            return false
+        }
+
+        for(let row = 0; row < this.height; row++)
+        {
+            for(let column = 0; column < this.width; column++)
+            {
+                let colorAvaiable = Array.from(this.squareTypes)
+                colorAvaiable = shuffleArray(colorAvaiable)
+                let color = colorAvaiable[colorAvaiable.length - 1]
+                while(isMatch(color, row, column))
+                {
+                    colorAvaiable.pop()
+                    if(colorAvaiable.length == 0)break
+                    color = colorAvaiable[colorAvaiable.length - 1] 
+                }
+                if(colorAvaiable.length == 0)
+                    color = cc.Color.WHITE
+
+                let box = this.listBoxes[row][column]
+                this.createSquareAt(box.getComponent('Box'), box.position, color)
+            }
+        }
+    },
+
+    generateSquaresRandom(){
         for(let row = 0; row < this.height; row++)
         {
             this.listBoxes.push(new Array)
@@ -216,6 +320,7 @@ cc.Class({
                 let color = this.getColorInArray(this.squareTypes)
                 let box = this.createBoxAt(row, column, position, color)
                 this.listBoxes[row].push(box)
+                this.createSquareAt(box.getComponent('Box'), position, color)
             }
         }
     },
@@ -259,8 +364,6 @@ cc.Class({
         {
             boxCom.row = row
             boxCom.column = column
-            this.createSquareAt(boxCom, position, color)
-
         }
         box.setPosition(position)
         this.node.addChild(box, 10)
